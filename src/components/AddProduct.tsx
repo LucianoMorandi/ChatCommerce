@@ -47,5 +47,54 @@ const AddProduct = () => {
         }
     };
 
-    
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!imageFile || !formData.name || !formData.price || !formData.brand) {
+            alert('Por favor, completa todos los campos!!');
+            return;
+        }
+
+        try {
+            const uploadedImageUrl = await uploadImageToCloudinary(imageFile);
+            const productData = { ...formData, imageUrl: uploadedImageUrl, price: Number(formData.price) };
+            await saveProduct(productData);
+            alert('Producto agregado con éxito!!');
+            setFormData({ imageUrl: '', name: '', price: '', brand: ''});
+            setImageFile(null);
+        } catch (error) {
+            console.error('Error al guardar el producto:', error);
+        }
+    };
+
+    React.useEffect(() => {
+        handleFetchBrands();
+    }, []);
+
+    return (
+        <div>
+            <h2>Agregar producto</h2>
+            <form onSubmit={handleSubmit}>
+                <input type="text" name="name" placeholder="Nombre del producto" value={formData.name} onChange={handleInputChange} />
+                <input type="number" name="price" placeholder="Precio del producto" value={formData.price} onChange={handleInputChange} />
+
+                <select name="brand" value={formData.brand} onChange={handleInputChange}>
+                    <option value="">Selecciona una marca</option>
+                    {brands.map((brand) => (
+                        <option key={brand} value={brand}>
+                            {brand}
+                        </option>
+                    ))}
+                </select>
+
+                <input type="text" placeholder="Nueva marca" value={newBrand} onChange={(e) => setNewBrand(e.target.value)} />
+                <button type="button" onClick={handleSaveBrand}>Guardar nueva marca</button>
+
+                <input type="file" accept="image/*" onChange={handleImageChange} />
+                <button type="submit">Agregar producto</button>
+            </form>
+        </div>
+    );
 };
+
+export default AddProduct;
